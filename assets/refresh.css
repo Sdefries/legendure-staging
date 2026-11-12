@@ -1,0 +1,243 @@
+/* =====================================================================
+   Legendure design refresh
+   Load AFTER assets/site.css on every page:
+     <link rel="stylesheet" href="assets/site.css">
+     <link rel="stylesheet" href="assets/refresh.css">
+   Works with assets/motion.js. Everything here is additive: it reuses the
+   existing class names in site.css and only adds a few new ones (listed in
+   HANDOFF.md). No new colors. No new fonts.
+   ===================================================================== */
+
+:root {
+  /* existing brand tokens, unchanged: --navy --navy-dark --blue --green --paper --line --ink-soft --cta-deep */
+  --mist: #EAF4FB;                 /* already used in the hero graphic pills, now a token */
+  --green-ink: #207F4C;            /* = --cta-deep, for text and icons on white */
+  --hairline: rgba(18, 31, 64, .12);
+  --hairline-strong: rgba(18, 31, 64, .2);
+
+  /* depth: soft, long shadows instead of 1px borders on cards */
+  --shadow-sm: 0 6px 16px -10px rgba(18, 31, 64, .35);
+  --shadow-md: 0 18px 40px -22px rgba(18, 31, 64, .45), 0 3px 10px -6px rgba(18, 31, 64, .12);
+  --shadow-lg: 0 34px 70px -32px rgba(14, 27, 55, .55), 0 6px 18px -10px rgba(14, 27, 55, .18);
+
+  /* the delivery line: Legendure's green bar, used as the motion signature */
+  --bar-h: 6px;
+
+  /* type */
+  --title-weight: 700;             /* section titles were 800. Hero h1 stays 800 */
+  --title-track: -.05em;
+
+  /* motion */
+  --ease-out: cubic-bezier(.215, .61, .355, 1);      /* entrances */
+  --ease-inout: cubic-bezier(.645, .045, .355, 1);   /* things that travel */
+  --ease-pop: cubic-bezier(.34, 1.7, .64, 1);        /* small dots and checks */
+  --dur-fast: .2s;
+  --dur: .8s;
+}
+
+/* ---------------------------------------------------------------------
+   1. Remove eyebrow labels and breadcrumbs
+   Delete them from the HTML too (see HANDOFF.md). This is a safety net.
+   --------------------------------------------------------------------- */
+.section-topline,
+.crumbs,
+.inner-hero .eyebrow,
+.situations-eyebrow { display: none !important; }
+
+/* ---------------------------------------------------------------------
+   2. Type
+   --------------------------------------------------------------------- */
+.section-head h2,
+.section-title,
+.feature-two h2,
+.end-cta h2 {
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-track);
+  line-height: 1.06;
+  text-wrap: balance;
+}
+.section-head { margin-bottom: clamp(36px, 4vw, 56px); }
+.word { display: inline-block; }   /* motion.js splits headlines into .word spans */
+
+/* ---------------------------------------------------------------------
+   3. Header: condenses on scroll
+   motion.js adds .is-scrolled to <header> after 24px of scroll.
+   --------------------------------------------------------------------- */
+header { position: sticky; top: 0; transition: background-color .3s ease, box-shadow .3s ease, border-color .3s ease; }
+header .head { transition: height .35s var(--ease-inout); }
+header.is-scrolled {
+  background: rgba(255, 255, 255, .86);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border-bottom-color: transparent;
+  box-shadow: 0 10px 30px -22px rgba(18, 31, 64, .5);
+}
+header.is-scrolled .head { height: 68px; }
+.header-links > a, .header-links summary { position: relative; text-decoration: none !important; }
+.header-links > a::after, .header-links summary::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 2px;
+  background: var(--green); transform: scaleX(0); transform-origin: left;
+  transition: transform .3s var(--ease-out);
+}
+.header-links > a:hover::after, .header-links summary:hover::before,
+.header-links > a[aria-current="page"]::after { transform: scaleX(1); }
+
+/* ---------------------------------------------------------------------
+   4. Buttons: the arrow points where it goes
+   --------------------------------------------------------------------- */
+.btn { transition: background-color var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast), transform .15s ease, box-shadow .25s ease; }
+.btn:hover { transform: none; box-shadow: var(--shadow-sm); }
+.btn:active { transform: scale(.98); }
+.btn .arr { display: inline-block; transition: transform .25s var(--ease-out); }
+.btn:hover .arr { transform: translate(3px, -3px); }                 /* ↗ */
+.btn[href^="#"]:hover .arr { transform: translateY(3px); }            /* ↓ in-page links */
+
+/* ---------------------------------------------------------------------
+   5. The delivery line
+   Every green bar on the site (hero rule, card tops, the line above the
+   footer) draws in from the left when it enters the screen. Add
+   class="dl" to any element that should carry a bar on its top edge.
+   --------------------------------------------------------------------- */
+.dl { position: relative; }
+.dl::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--bar-h);
+  background: var(--bar, var(--green)); transform-origin: left;
+  border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+}
+.js-motion .dl:not(.is-in)::before { transform: scaleX(0); }
+.dl.is-in::before { transform: scaleX(1); transition: transform 1s var(--ease-inout) var(--bar-delay, 0s); }
+
+.hero-rule-line { display: block; width: 110px; height: var(--bar-h); background: var(--green); margin: 0 0 26px; transform-origin: left; }
+
+/* ---------------------------------------------------------------------
+   6. Inner hero (AI page and other practice pages)
+   --------------------------------------------------------------------- */
+.inner-hero h1 { margin-bottom: 22px; }
+.hero-photo { overflow: hidden; }
+.hero-photo img { transform-origin: 60% 50%; }
+
+/* The cycle card ("Adopt AI with control"), now live */
+.hero-graphic { box-shadow: var(--shadow-lg); }
+.hero-graphic .hg-pill rect { transition: fill .45s ease, stroke .45s ease; }
+.hero-graphic .hg-pill text { transition: fill .45s ease; }
+.hero-graphic .hg-pill.is-active rect { fill: var(--navy); stroke: var(--navy); }
+.hero-graphic .hg-pill.is-active text { fill: #fff; }
+.hero-graphic .hg-pill.is-done rect { fill: #E6F4EC; stroke: #9ED3B3; }
+.hero-graphic .hg-runner { filter: drop-shadow(0 3px 6px rgba(18, 31, 64, .3)); }
+.hg-status { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--mist); color: var(--navy); font-size: 12.5px; line-height: 1.3; }
+.hg-line { margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hg-step { font-weight: 800; }
+.hg-work { color: var(--ink-soft); }
+.hero-graphic .hg-runner { transition: none; }
+.hg-check { position: relative; width: 18px; height: 18px; border-radius: 50%; background: rgba(18, 31, 64, .1); transition: background-color .3s ease; }
+.hg-check svg { position: absolute; inset: 0; fill: none; stroke: #fff; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 10; stroke-dashoffset: 10; transition: stroke-dashoffset .4s ease .1s; }
+.hg-status.is-done .hg-check { background: var(--green-ink); }
+.hg-status.is-done .hg-check svg { stroke-dashoffset: 0; }
+.hg-progress { grid-column: 1 / -1; height: 3px; border-radius: 3px; background: rgba(18, 31, 64, .1); overflow: hidden; }
+.hg-progress i { display: block; height: 100%; width: 100%; background: var(--green); transform: scaleX(var(--p, 0)); transform-origin: left; }
+
+/* ---------------------------------------------------------------------
+   7. Numbered rows (.line-items): a quiet hover with the delivery line
+   --------------------------------------------------------------------- */
+.line-item { position: relative; transition: background-color .3s ease; }
+.line-item::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: var(--green); transform: scaleX(0); transform-origin: left;
+  transition: transform .5s var(--ease-out);
+}
+.line-item h3 { transition: transform .35s var(--ease-out); }
+@media (hover: hover) {
+  .line-item:hover::after { transform: scaleX(1); }
+  .line-item:hover h3 { transform: translateX(6px); }
+}
+
+/* ---------------------------------------------------------------------
+   8. Process track (.phase-grid becomes a live sequence)
+   Markup additions in HANDOFF.md: wrapper .process-track, and a
+   <ul class="phase-out"> inside each .phase.
+   --------------------------------------------------------------------- */
+.process-track { position: relative; }
+.process-rail { position: relative; height: 4px; margin: 0 0 22px; border-radius: 4px; background: rgba(18, 31, 64, .12); overflow: hidden; }
+.process-rail i { position: absolute; inset: 0; background: var(--navy); transform: scaleX(var(--rail, 0)); transform-origin: left; transition: transform .7s var(--ease-inout); }
+.phase { position: relative; border-top: 0 !important; border-radius: 14px; box-shadow: var(--shadow-sm); transition: transform .5s var(--ease-out), box-shadow .5s ease, opacity .4s ease; cursor: pointer; }
+.phase:nth-child(even) { --bar: var(--navy); }
+.phase .phase-timer { position: absolute; left: 0; right: 0; top: 0; height: var(--bar-h); border-radius: 14px 14px 0 0; overflow: hidden; }
+.phase .phase-timer i { display: block; height: 100%; background: rgba(255, 255, 255, .55); transform: scaleX(0); transform-origin: left; }
+.phase-out { list-style: none; margin: 18px 0 0; padding: 14px 0 0; border-top: 1px solid var(--hairline); display: grid; gap: 8px; font-size: 13.5px; line-height: 1.4; color: var(--navy); }
+.phase-out li { display: flex; gap: 9px; align-items: baseline; font-weight: 700; }
+.phase-out li::before { content: "↗"; color: var(--green-ink); font-weight: 900; }
+.js-motion .phase-out { display: none; }
+.process-track.is-live .phase-grid:hover .phase:not(:hover) { opacity: .8; }
+.phase.is-active { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
+.phase.is-active .phase-out { display: grid; animation: phase-in .5s var(--ease-out) both; }
+@keyframes phase-in { from { opacity: 0; transform: translateY(8px); } }
+.phase:focus-visible { outline: 3px solid var(--navy); outline-offset: 4px; }
+
+/* ---------------------------------------------------------------------
+   9. Starting points list: each row checks in
+   --------------------------------------------------------------------- */
+.feature-two li { position: relative; transition: color .4s ease, background-color .3s ease, padding-left .35s var(--ease-out); }
+.js-motion .feature-two ul:not(.is-played) li:not(.is-lit) { color: rgba(18, 31, 64, .45); }
+.js-motion .feature-two ul:not(.is-played) li:not(.is-lit)::before { opacity: .25; }
+.feature-two li::before { display: inline-block; transition: opacity .3s ease, transform .4s var(--ease-pop); }
+.feature-two li.is-on::before { transform: translate(2px, -2px) scale(1.15); }
+@media (hover: hover) { .feature-two li:hover { padding-left: 8px; } }
+
+/* Network art (assets/visual-data.svg inlined, see HANDOFF.md) */
+.feature-art > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.net-edge { stroke-dasharray: var(--len, 400); stroke-dashoffset: 0; }
+.js-motion .feature-art:not(.is-in) .net-edge { stroke-dashoffset: var(--len, 400); }
+.feature-art.is-in .net-edge { transition: stroke-dashoffset 1.1s var(--ease-inout) var(--d, 0s); }
+.net-node { transform-box: fill-box; transform-origin: center; }
+.js-motion .feature-art:not(.is-in) .net-node { transform: scale(0); }
+.feature-art.is-in .net-node { transition: transform .5s var(--ease-pop) var(--d, 0s); }
+.net-core { transform-box: fill-box; transform-origin: center; }
+.feature-art.is-in .net-core { animation: core-breathe 4.8s ease-in-out 1.6s infinite; }
+@keyframes core-breathe { 50% { transform: scale(1.06); } }
+
+/* ---------------------------------------------------------------------
+   10. Stat figures settle (home page .exp-stat and any [data-settle])
+   --------------------------------------------------------------------- */
+[data-settle] { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------------
+   11. FAQ opens smoothly
+   motion.js wraps each answer in .faq-body. The + turns into ×.
+   --------------------------------------------------------------------- */
+.faq-list summary span[aria-hidden] { display: inline-block; transition: transform .35s var(--ease-out); }
+.faq-list details[open] summary span[aria-hidden] { transform: rotate(45deg); }
+.faq-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--ease-inout); }
+.faq-body > div { overflow: hidden; }
+details.is-opening .faq-body, details[open]:not(.is-closing) .faq-body { grid-template-rows: 1fr; }
+
+/* ---------------------------------------------------------------------
+   12. Closing band and footer
+   The green line between the CTA band and the footer draws in.
+   --------------------------------------------------------------------- */
+.page-footer { border-top: 0 !important; position: relative; }
+.page-footer::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--bar-h);
+  background: var(--green); transform-origin: left; transform: scaleX(var(--foot, 1));
+}
+.page-footer .footer-link-cols a { position: relative; width: fit-content; }
+.page-footer .footer-link-cols a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .3s var(--ease-out); }
+.page-footer .footer-link-cols a:hover::after { transform: scaleX(1); }
+.motion-toggle { font: inherit; font-size: 12px; color: #DCE7F1; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.motion-toggle:hover { color: #fff; }
+
+/* ---------------------------------------------------------------------
+   13. Cards: depth from shadow, not borders
+   --------------------------------------------------------------------- */
+.exp-case, .leader, .contact-demo, .direct-contact { border-color: transparent; box-shadow: var(--shadow-md); }
+.route-card, .core-tile { transition: transform .4s var(--ease-out), box-shadow .4s ease; }
+@media (hover: hover) {
+  .route-card:hover, .core-tile:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+}
+
+/* ---------------------------------------------------------------------
+   14. Still mode: reduced motion or Pause motion
+   --------------------------------------------------------------------- */
+.motion-paused *, .motion-paused *::before, .motion-paused *::after { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
